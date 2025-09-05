@@ -4,59 +4,35 @@ from Chiplet import *
 from HighwayOccupancy import *
 from Router import *
 from MECHBenchmarks import *
-import json
-import os
 
 from tqdm import tqdm
-import pickle
-
 import matplotlib.pyplot as plt
-
 import qiskit
+import logging
 
 
+def circuit_to_program(circuit: qiskit.circuit) -> list:
+    """ Translate circuit to MECH program.
 
-def QFT(data_qubit_num):
+    MECH only considers two-qubit gates, which are represented as ControlBlocks acting on
+    control and target qubits.
+
+    Args:
+        circuit (qiskit.circuit): Circuit to translate
+
+    Returns:
+        list: List of ControlBlocks
+    """
+    
     program = []
-    for i in range(data_qubit_num-1):
-        control_block = ControlBlock(i, Counter(list(range(i+1, data_qubit_num))*2))
-        program.append(control_block)
-    
-    return program
-
-
-def generate_simple_chiplet():
-    """
-    Generate simplified backend with highway layout and chiplet connections
-    """
-    
-    lane_num = 1
-    structure = 'square'
-    chip_col_num = 2
-    chip_row_num = 2
-    x_num, y_num = 9,9
-    # Generate layout of chip, by connecting smaller chiplets
-    G = gen_chiplet_array(structure, chip_col_num, chip_row_num, x_num, y_num, cross_link_sparsity=1)
-    # Add highway
-    gen_highway_layout(G)
-    return G
-
-
-def circuit_to_program(circuit):
-    """ Circuit to program 
-    
-    TODO: remove data_qubit_num, as this is generally not necessary
-    """
-
-    program = []
-    for instr, qargs, cargs in circuit.data:
+    for _, qargs, _ in circuit.data:
         
+        # Add two-qubit gate    
         if len(qargs) == 2:
-            # Add two-qubit gate    
             control = circuit.qubits.index(qargs[0])
             target = circuit.qubits.index(qargs[1])
             program.append(ControlBlock(control, Counter(list([target]))))
-    #print(len(program))
+        # Ignore one-qubit gates, as these are not relevant for mapping and routing
 
     return program
 
@@ -81,7 +57,6 @@ def program_to_circuit(router):
             #print(router.circuit.take_role(line, idx))
             
             if router.circuit.take_role(line, idx) == 'q':
-                #meas_num += 1
                 # Single qubit-gate
                 node = router.circuit.take_node(line, idx)
                 control_line = node.q
@@ -91,6 +66,7 @@ def program_to_circuit(router):
                 circuit.reset(control_qubit)
 
             # Iterate over targets
+            # TODO: WIP
             """
             if router.circuit.take_role(line, idx) in ['t', 'mt']:
                 # Target qubit
@@ -110,85 +86,54 @@ def program_to_circuit(router):
     return circuit
 
 
-def transpile_circuit_MECH(circuit, backend=None):
-    """ Transpile using MECH approach
+def transpile_circuit_MECH(circuit: qiskit.circuit, G: nx.Graph) -> Router:
+    """Perform mapping and routing with MECH
 
-    backend = backend to use; e. g. nighthawk. Currently not used
+    Args:
+        circuit (qiskit.circuit): _description_
+        G (nx.Graph): _description_
+
+    Returns:
+        Router: _description_
     """
     
-    transpiled_qc = circuit
-
-
-    # Generate backend with highway
-    G = generate_simple_chiplet()
-    gen_highway_layout(G)
-
+    logging.debug("Starting algorithm: MECH")
+    
     # Translate circuit to program (necessary for MECH)
-    #program = QFT(len(G.nodes) - len(get_highway_qubits(G))) # circuit_to_program(circuit)
     program = circuit_to_program(circuit)
-    print("Program generated")
+    logging.debug("Program generated")
     
-    
+    # Set some parameters
     prep_period = 13
     meas_period = 2
     cross_chip_gate_weight = 7.4
+
+    # Initialize router
     router = Router(G, prep_period=prep_period, meas_period=meas_period)
 
+    # Perform local routing
+    for i, control_block in enumerate(tqdm(program, total=len(program))):
+        router.execute_control_multi_target_block(control_block, cross_chip_gate_weight, cross_chip_overhead = 3)
 
-    if False:
-        for i, control_block in enumerate(tqdm(program, total=len(program))):
+    # Perform routing using the highway
+    for shuttle_idx in range(len(router.highway_manager.shuttle_stack)):
+        for idx in range(router.highway_manager.get_shuttle_prep_start_time(shuttle_idx), router.highway_manager.get_shuttle_exec_start_time(shuttle_idx)):
+            for line in range(len(router.circuit.circuit_lines)):
+                assert router.circuit.is_position_empty(line, idx)
 
-            #if target != control
-            router.execute_control_multi_target_block(control_block, cross_chip_gate_weight, cross_chip_overhead = 3)
-            
-            #else:
-            """
-                earliest_idx = self.get_highway_aware_earliest_index_for_1qubit_op(circuit, op)
-                if earliest_idx < 0:
-                    earliest_idx = self.get_shuttle_exec_start_time(len(self.shuttle_stack)-1)
-                circuit.add_1qubit_op(op, depth=earliest_idx + 1)
-
-                op = OpNode('M')
-                router.circuit.add_1qubit_op(op, depth=None)
-                
-                def add_1qubit_op(self, op, depth=None):
-                    if depth is not None:
-                        idx = depth - 1
-                    else:
-                        idx = self.get_line_depth(op.q)
-                    self.add_node_with_role(op.q, idx, op, 'q')
-                
-            """
-        #print(router.circuit.circuit_lines)
-        #print(len(router.highway_manager.shuttle_stack))
+        source_measured_qubits_dict = router.highway_manager.bridge_throughout_highway(router.circuit, shuttle_idx)
+        router.highway_manager.reentangle_throughout_highway(router.circuit, shuttle_idx, source_measured_qubits_dict)
+    
+    # Perform measurements
+    for shuttle_idx in range(len(router.highway_manager.shuttle_stack)):
+        router.highway_manager.measure_throughout_highway(router.circuit, shuttle_idx)
 
 
-        for shuttle_idx in range(len(router.highway_manager.shuttle_stack)):
-            for idx in range(router.highway_manager.get_shuttle_prep_start_time(shuttle_idx), router.highway_manager.get_shuttle_exec_start_time(shuttle_idx)):
-                for line in range(len(router.circuit.circuit_lines)):
-                    assert router.circuit.is_position_empty(line, idx)
+    # TODO: The constructed circuit can not yet be used to perform simulations. In the following, only the router, which keeps a circuit
+    # consisting of ControlBlock, is returned. In a future version it should be possible to translate the program structure back to a 
+    # qiskit.circuit.
+    # transpiled_qc = program_to_circuit(router)
 
-            source_measured_qubits_dict = router.highway_manager.bridge_throughout_highway(router.circuit, shuttle_idx)
-            router.highway_manager.reentangle_throughout_highway(router.circuit, shuttle_idx, source_measured_qubits_dict)
-        
+    logging.debug("Finished algorithm!")
 
-        for shuttle_idx in range(len(router.highway_manager.shuttle_stack)):
-            router.highway_manager.measure_throughout_highway(router.circuit, shuttle_idx)
-
-
-
-    with open('../qecc_mapping/tests/transpiled_circuit_mech', 'rb') as file:
-        router_loaded = pickle.load(file)
-
-    print("loaded router")
-    router = router_loaded
-    #transpiled_qc = program_to_circuit(router)
-    transpiled_qc_testing = program_to_circuit(router)
-    #print(transpiled_qc_testing)
-
-
-    #filehandler = open('transpiled_circuit_mech', 'wb') 
-    #pickle.dump(router, filehandler)
-    #print("pickled file")
-
-    return transpiled_qc
+    return router

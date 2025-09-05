@@ -91,8 +91,8 @@ def transpile_circuit_QECCSynth(code_distance, architecture):
     CG, idx2coord = architecture
 
     # Plot
-    cm = CouplingMap(couplinglist=CG)
-    plot_coupling_map(cm.size(), None, cm.get_edges(), filename="testing.png")
+    #cm = CouplingMap(couplinglist=CG)
+    #plot_coupling_map(cm.size(), None, cm.get_edges(), filename="testing.png")
     
     CG = np.array(coupling_to_adjacency(CG))
     idx2coord = idx_dict_to_list(idx2coord)
