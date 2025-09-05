@@ -1,4 +1,0 @@
-{'circ': 'Surface_3.qasm', 'cnots': 24, 'swaps': 32, 'solve_time': 0.035210609436035156, 'algorithm ': 'sabre', 'arch': 'h_hex'}
-# Physical Qubit: 46
-# Extra CNOT Count: 96
-Total Depth: 26

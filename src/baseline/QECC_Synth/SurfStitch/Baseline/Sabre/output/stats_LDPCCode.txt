@@ -1,4 +1,0 @@
-{'circ': 'LDPCCode.qasm', 'cnots': 72, 'swaps': 242, 'solve_time': 0.08462858200073242, 'algorithm ': 'sabre', 'arch': 'square'}
-# Physical Qubit: 121
-# Extra CNOT Count: 726
-Total Depth: 205
