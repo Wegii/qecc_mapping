@@ -1,0 +1,136 @@
+# Main Table 1
+# This function is set to read data by default.
+# To reproduce the results, add the parameters "-S1 -S2" to all "python3 src/CodeStitch.py" commands.
+
+## 9_1_3 code (d=3 Surface code)
+python3 src/StabCode.py code/Surface_3.stab -c SurfaceCode -d 3
+### Square
+python3 src/TopologyGraph.py arch/square_5x5.json -a square -m 5 -n 5 
+python3 src/CodeStitch.py code/Surface_3.stab arch/square_5x5.json -p Flag-Bridge -mT 50
+### Hexagon
+python3 src/TopologyGraph.py arch/hexagon_3x7.json -a hexagon -m 3 -n 7
+python3 src/CodeStitch.py code/Surface_3.stab arch/hexagon_3x7.json -p Flag-Bridge -mT 50 -L 3
+### H_Square
+python3 src/TopologyGraph.py arch/h_square_3x4.json -a h_square -m 3 -n 4
+python3 src/CodeStitch.py code/Surface_3.stab arch/h_square_3x4.json -p Flag-Bridge -mT 50 -L 3
+### H_Hexagon
+python3 src/TopologyGraph.py arch/h_hexagon_3x7.json -a h_hexagon -m 3 -n 7
+python3 src/CodeStitch.py code/Surface_3.stab arch/h_hexagon_3x7.json -p Flag-Bridge -mT 50 -L 7
+
+## 16_4_3 code
+python3 src/StabCode.py code/16_4_3Code.stab -c 16_4_3Code
+### Square
+python3 src/TopologyGraph.py arch/square_5x7.json -a square -m 5 -n 7
+python3 src/CodeStitch.py code/16_4_3Code.stab arch/square_5x7.json -p Flag-Bridge -mT 50 -L 2
+### Hexagon
+python3 src/TopologyGraph.py arch/hexagon_5x10.json -a hexagon -m 5 -n 10
+python3 src/CodeStitch.py code/16_4_3Code.stab arch/hexagon_5x10.json -p Flag-Bridge -mT 50 -L 4
+### H_Square
+python3 src/TopologyGraph.py arch/h_square_5x7.json -a h_square -m 5 -n 7
+python3 src/CodeStitch.py code/16_4_3Code.stab arch/h_square_5x7.json -p Flag-Bridge -mT 50 -L 5
+### H_Hexagon
+python3 src/TopologyGraph.py arch/h_hexagon_5x10.json -a h_hexagon -m 5 -n 10
+python3 src/CodeStitch.py code/16_4_3Code.stab arch/h_hexagon_5x10.json -p Flag-Bridge -mT 50 -L 7
+
+
+## 8_3_2 code
+python3 src/StabCode.py code/8_3_2Code.stab -c 8_3_2Code
+### Square
+python3 src/TopologyGraph.py arch/square_5x6.json -a square -m 5 -n 6
+python3 src/CodeStitch.py code/8_3_2Code.stab arch/square_5x6.json -p Shor -mT 50
+### Hexagon
+python3 src/TopologyGraph.py arch/hexagon_4x4.json -a hexagon -m 4 -n 4
+python3 src/CodeStitch.py code/8_3_2Code.stab arch/hexagon_4x4.json -p Flag-Bridge -mT 50
+
+
+## Steane code
+python3 src/StabCode.py code/Steane.stab -c SteaneCode
+### Square
+python3 src/TopologyGraph.py arch/square_5x5.json -a square -m 5 -n 5
+python3 src/CodeStitch.py code/Steane.stab arch/square_5x5.json -p Shor -mT 50
+
+
+## HGP LDPC code
+python3 src/StabCode.py code/LDPCCode.stab -c LDPCCode
+### Square
+python3 src/TopologyGraph.py arch/square_11x11.json -a square -m 11 -n 11
+python3 src/CodeStitch.py code/LDPCCode.stab arch/square_11x11.json -p Flag-Bridge -mT 50 -n 2 -L 3
+### Hexagon
+python3 src/TopologyGraph.py arch/hexagon_8x16.json -a hexagon -m 7 -n 16
+python3 src/CodeStitch.py code/LDPCCode.stab arch/hexagon_8x16.json -p Flag-Bridge -mT 50 -n 2 -L 4
+## H_Sqaure
+python3 src/TopologyGraph.py arch/h_square_8x8.json -a h_square -m 8 -n 8
+python3 src/CodeStitch.py code/LDPCCode.stab arch/h_square_8x8.json -p Flag-Bridge -mT 50 -n 2 -L 4
+## H_Hexagon
+python3 src/TopologyGraph.py arch/h_hexagon_7x16.json -a h_hexagon -m 7 -n 16
+python3 src/CodeStitch.py code/LDPCCode.stab arch/h_hexagon_7x16.json -p Flag-Bridge -mT 50 -n 2 -L 7
+
+
+## 81_1_9 Surface Code
+python3 src/StabCode.py code/Surface_9.stab -c SurfaceCode -d 9
+## Square
+python3 src/TopologyGraph.py arch/square_17x17.json -a square -m 17 -n 17
+python3 src/CodeStitch.py code/Surface_9.stab arch/square_17x17.json -p Flag-Bridge -mT 50
+## Hexagon
+python3 src/TopologyGraph.py arch/hexagon_9x25.json -a hexagon -m 9 -n 25 
+python3 src/CodeStitch.py code/Surface_9.stab arch/hexagon_9x25.json -p Flag-Bridge -mT 50 -L 4 -n 4
+## H_Sqaure
+python3 src/TopologyGraph.py arch/h_square_9x10.json -a h_square -m 9 -n 10
+python3 src/CodeStitch.py code/Surface_9.stab arch/h_square_9x10.json -p Flag-Bridge -mT 50 -L 3
+## H_Hexagon
+python3 src/TopologyGraph.py arch/h_hexagon_9x18.json -a h_hexagon -m 9 -n 18
+python3 src/CodeStitch.py code/Surface_9.stab arch/h_hexagon_9x18.json -p Flag-Bridge -mT 50 -L 7 -n 4 
+
+
+
+
+
+# Table 2
+
+## Surface code d = 5 
+python3 src/StabCode.py code/Surface_5.stab -c SurfaceCode -d 5
+
+## Perfect Case
+## Surface Code => Square
+python3 src/TopologyGraph.py arch/square_9x9.json -a square -m 9 -n 9
+python3 src/CodeStitch.py code/Surface_5.stab arch/square_9x9.json -p Flag-Bridge -mT 50
+## Surface Code => Hexagon
+python3 src/TopologyGraph.py arch/hexagon_5x13.json -a hexagon -m 5 -n 13
+python3 src/CodeStitch.py code/Surface_5.stab arch/hexagon_5x13.json -p Flag-Bridge -mT 50 -L 4
+## Surface Code => H_Square
+python3 src/TopologyGraph.py arch/h_square_5x6.json -a h_square -m 5 -n 6
+python3 src/CodeStitch.py code/Surface_5.stab arch/h_square_5x6.json -p Flag-Bridge -mT 50 -L 3
+## Surface Code => H_Hexagon
+python3 src/TopologyGraph.py arch/h_hexagon_5x10.json -a h_hexagon -m 5 -n 10
+python3 src/CodeStitch.py code/Surface_5.stab arch/h_hexagon_5x10.json -p Flag-Bridge -mT 50 -L 7
+
+
+## Defective Case
+## Square
+python3 src/TopologyGraph.py arch/defective_square_13x13.json -a square -m 13 -n 13 -d on
+python3 src/CodeStitch.py code/Surface_5.stab arch/defective_square_13x13.json -p Flag-Bridge -mT 50 -L 2
+## Hexagon
+python3 src/TopologyGraph.py arch/defective_hexagon_7x17.json -a hexagon -m 7 -n 17 -d on
+python3 src/CodeStitch.py code/Surface_5.stab arch/defective_hexagon_7x17.json -p Flag-Bridge -mT 50 -L 6
+## H_Square
+python3 src/TopologyGraph.py arch/defective_h_square_7x8.json -a h_square -m 7 -n 8 -d on
+python3 src/CodeStitch.py code/Surface_5.stab arch/defective_h_square_7x8.json -p Flag-Bridge -mT 50 -L 5
+## H_Hexagon
+python3 src/TopologyGraph.py arch/defective_h_hexagon_7x17.json -a h_hexagon -m 7 -n 17 -d on
+python3 src/CodeStitch.py code/Surface_5.stab arch/defective_h_hexagon_7x17.json -p Flag-Bridge -mT 50 -L 7
+
+
+
+
+
+
+
+## Surface code d = 7 
+python3 src/StabCode.py code/Surface_7.stab -c SurfaceCode -d 7
+
+## Perfect Case
+## H_Square
+python3 src/TopologyGraph.py arch/h_square_7x8.json -a h_square -m 7 -n 8 
+python3 src/CodeStitch.py code/Surface_7.stab arch/h_square_7x8.json -p Flag-Bridge -mT 50 -L 3
+
+

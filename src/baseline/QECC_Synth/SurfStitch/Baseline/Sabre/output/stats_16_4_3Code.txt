@@ -1,0 +1,4 @@
+{'circ': '16_4_3Code.qasm', 'cnots': 60, 'swaps': 90, 'solve_time': 0.04794597625732422, 'algorithm ': 'sabre', 'arch': 'square'}
+# Physical Qubit: 35
+# Extra CNOT Count: 270
+Total Depth: 56

@@ -1,0 +1,33 @@
+c
+c NuWLS based on TT-Open-WBO-Inc:	 an Anytime MaxSAT Solver --- based on Glucose4.1 (core version)
+c Version:	 MaxSAT Evaluation 2021
+c Author of NuWLS:	 Yi Chu, Xiang He
+c Author of TT-Open-WBO-Inc:	 Alexander Nadel
+c Authors of the baseline solver Open-WBO-Inc:	 Saurabh Joshi, Prateek Kumar, Ruben Martins, Sukrut Rao
+c WARNING: for repeatability, setting FPU to use double precision
+c |                                                                                                       |
+c ========================================[ Problem Statistics ]===========================================
+c |                                                                                                       |
+c |  Problem Format:             MaxSAT                                                                   |
+c |  Problem Type:           Unweighted                                                                   |
+c |  Number of variables:      76221336                                                                   |
+c |  Number of hard clauses:    159261025                                                                   |
+c |  Number of soft clauses:      46020                                                                   |
+c |  Number of cardinality:           0                                                                   |
+c |  Number of PB :                   0                                                                   |
+c |  Parse time:                  14.68 s                                                                 |
+c |                                                                                                       |
+c | best-alg-selector overriden target_vars_bump_val to 0, since it hadn't been set by the user |
+c | best-alg-selector overriden ms_model_per_sec_thr to 2, since it hadn't been set by the user |
+c | best-alg-selector overriden ms_mutation_classes to 0, since it hadn't been set by the user |
+c | best-alg-selector overriden ms_chrono to 100, since it hadn't been set by the user |
+c ==========================================[ Solver Settings ]============================================
+c |                                                                                                       |
+c |  Algorithm:                     OBV                                                                   |
+c |  Cardinality Encoding:       Modulo Totalizer                                                         |
+c |  Limit number conflicts:       1000                                                                   |
+c |  Limit number iterations: 2147483647                                                                   |
+c |  Global limit number conflicts:   F                                                                   |
+c |                                                                                                       |
+c Mrs. Beaver incomplete stage
+s UNKNOWN
