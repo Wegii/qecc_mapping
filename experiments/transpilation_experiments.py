@@ -86,8 +86,79 @@ def generate_qiskit_backend_from_mech(G: nx.graph) -> CouplingMap:
     return CouplingMap(regular_coupling)
 
 
+def coupling_to_adjacency(coupling_map: list) -> np.array:
+    """Generate adjacency matrix from coupling map
+
+    Args:
+        coupling_map (list): Coupling map for backend as list containing (qubit_index, neighbour_index)
+
+    Returns:
+        np.array: Adjacency matrix
+    """
+
+    # Extract unique qubits and sort them
+    qubits = sorted({q for pair in coupling_map for q in pair})
+    qubit_index = {q: i for i, q in enumerate(qubits)}
+    # Initialize adjacency matrix with zeros
+    size = len(qubits)
+    matrix = [[0 for _ in range(size)] for _ in range(size)]
+    # Fill in the adjacency matrix
+    for a, b in coupling_map:
+        i, j = qubit_index[a], qubit_index[b]
+        matrix[i][j] = 1
+        matrix[j][i] = 1 # Assuming undirected graph
+
+    return np.array(matrix)
+
+
+def idx_dict_to_list(mapping_dict: dict) -> list:
+    """Construct qubit index list
+
+    Args:
+        mapping_dict (dict): Qubit indices
+
+    Returns:
+        list: Indices
+    """
+
+    # Step 1: Group by row
+    from collections import defaultdict
+
+    row_groups = defaultdict(list)
+    for (row, col), val in mapping_dict.items():
+        row_groups[row].append(col)
+
+    # Step 2: Sort columns within each row
+    for row in row_groups:
+        row_groups[row].sort()
+
+    # Step 3: Convert to [row_index, sequential_index] list
+    result = []
+    for row in sorted(row_groups.keys()):
+        for seq_index, col in enumerate(row_groups[row]):
+            result.append([row - min(row_groups.keys()), seq_index])
+
+    return result
+
+
 def generate_qecc_synth_backend_from_mech(G: nx.graph) -> tuple[np.array, list]:
-    pass
+    """Generate backend for QECC-Synth given MECH backend
+
+    Args:
+        G (nx.graph): Backend
+
+    Returns:
+        tuple[np.array, list]: Adjacency graph and qubit index list
+    """
+
+    qubit_idx_dict = gen_qubit_idx_dict(G)
+    regular_coupling = list([qubit_idx_dict[n1], qubit_idx_dict[n2]] for n1,n2 in G.edges)
+    regular_coupling += list([qubit_idx_dict[n2], qubit_idx_dict[n1]] for n1,n2 in G.edges)
+
+    CG = coupling_to_adjacency(regular_coupling)
+    qubit_idx_dict = idx_dict_to_list(qubit_idx_dict)
+
+    return (CG, qubit_idx_dict)
 
 
 def display_simple_backend(backend: nx.Graph, filename: str) -> None:
@@ -122,8 +193,12 @@ def write_to_file(object, filename: str) -> None:
 code_name = "surface"
 
 # Generate square backend of different size and chiplet connectivity
-nnx = [4, 6, 8]
-cl = [1, 2]
+#nnx = [4, 6, 8]
+#cl = [4]
+#cl = [4, 2, 1]
+nnx = [8]
+cl = [4]
+
 for n, c in tqdm(itertools.product(nnx, cl), total=len(nnx) * len(cl)):
     logging.info(f"Running experiment for nx = ny = {n} and c = {c}")
 
@@ -147,17 +222,16 @@ for n, c in tqdm(itertools.product(nnx, cl), total=len(nnx) * len(cl)):
     # Mapping and routing of the circuit, utilizing different algorithms
 
     # MECH
-    #circuit_mech = transpile_circuit_MECH(code.qc, simple_dqc_backend)
-    #write_to_file(circuit_mech, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_mech")
+    circuit_mech = transpile_circuit_MECH(code.qc, simple_dqc_backend)
+    write_to_file(circuit_mech, f"data/transpiled_circuit/{code_name}_{d}_square_{n}_{n}_{c}_mech")
 
-    """
-    print ("QECC-Synth")
-    # Transpile with QECC-Synth
-    qubit_idx_dict = gen_qubit_idx_dict(G)
-    regular_coupling = list([qubit_idx_dict[n1], qubit_idx_dict[n2]] for n1,n2 in G.edges)
-    regular_coupling += list([qubit_idx_dict[n2], qubit_idx_dict[n1]] for n1,n2 in G.edges)
-    circuit_qecc_synth = transpile_circuit_QECCSynth(d, (regular_coupling, qubit_idx_dict))
-    """
+    # QECC-Synth
+    # Generate backend for QECC-Synth
+    architecture = generate_qecc_synth_backend_from_mech(simple_dqc_backend)
+    # Perform algorithm
+    circuit_qecc_synth = transpile_circuit_QECCSynth(d, architecture, f'square_{n}_{n}_{c}')
+    write_to_file(circuit_qecc_synth, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_qecc_synth")  
+    # Found optimium: 6, 6, 4  
 
     # Qiskit-SABRE
     # Generate backend for qiskit

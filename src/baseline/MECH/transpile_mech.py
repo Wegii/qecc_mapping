@@ -97,7 +97,7 @@ def transpile_circuit_MECH(circuit: qiskit.circuit, G: nx.Graph) -> Router:
         Router: _description_
     """
     
-    logging.debug("Starting algorithm: MECH")
+    logging.info("Starting algorithm: MECH")
     
     # Translate circuit to program (necessary for MECH)
     program = circuit_to_program(circuit)
@@ -134,6 +134,6 @@ def transpile_circuit_MECH(circuit: qiskit.circuit, G: nx.Graph) -> Router:
     # qiskit.circuit.
     # transpiled_qc = program_to_circuit(router)
 
-    logging.debug("Finished algorithm!")
+    logging.info("Finished algorithm!")
 
     return router

@@ -16,8 +16,8 @@ def transpile_circuit_SABRE(circuit: qiskit.circuit, coupling_map: CouplingMap) 
         qiskit.circuit: Transpiled circuit
     """
 
-    logging.debug("Starting algorithm: qiskit-SABRE")
+    logging.info("Starting algorithm: qiskit-SABRE")
     transpiled_circuit = transpile(circuit, coupling_map=coupling_map, optimization_level=2)
-    logging.debug("Finished algorithm!")
+    logging.info("Finished algorithm!")
 
     return transpiled_circuit
