@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.getcwd(), "."))
 import pickle
 import itertools
 from tqdm import tqdm
+import logging
 
 # Plotting
 import pandas as pd
@@ -12,7 +13,8 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import seaborn as sns
-
+from circuit_statistics import *
+from experiments.transpilation_experiments import generate_simple_dqc_backend
 
 marker_styles = {
     'gross': 'o',
@@ -29,7 +31,7 @@ code_rename_map = {
 }
 
 
-def plot_gate_overhead(result_mech: dict, result_qecc_synth: dict, result_qiskit: dict) -> None:
+def plot_gate_overhead(result_mech: dict, result_qecc_synth: dict, result_qiskit: dict, filename) -> None:
 
     # Load data
     codes = ['MECH', 'Qiskit-SABRE']
@@ -75,29 +77,41 @@ def plot_gate_overhead(result_mech: dict, result_qecc_synth: dict, result_qiskit
     ax.legend(title="Metric", fontsize=12, title_fontsize=12, frameon=True, ncol=2)
 
     plt.tight_layout()
-    plt.savefig(f"gate_overhead_mech_vs_sabre.png", bbox_inches="tight")
+    plt.savefig(filename, bbox_inches="tight")
     plt.close()
 
 
 base_path = "./data/transpiled_circuit/"
-
+code_name = "surface"
 
 # Iterate over different backend configurations
 nnx = [4, 6, 8]
 cl = [1, 2]
 for n, c in tqdm(itertools.product(nnx, cl), total=len(nnx) * len(cl)):
     # TODO: load files based on backend configuration
-    """
+
+    # Load architecture
+    simple_dqc_backend, qubit_num, data_qubit_num = generate_simple_dqc_backend(n, n, c)
+    
     # MECH
-    with open(base_path + "asd", 'rb') as file:
+    logging.info("MECH: Loading file")
+    with open(base_path + f'{code_name}_d_square_{n}_{n}_{c}_mech', 'rb') as file:
         circuit_mech = pickle.load(file)
+    logging.info("MECH: Calculating statistics")
+    result_mech = calc_circuit_mech_stats(circuit_mech)
 
     #QECC-Synth
-    with open(base_path + "asd", 'rb') as file:
-        circuit_mech = pickle.load(file)
+    #with open(base_path + f'{code_name}_d_square_{n}_{n}_{c}_qecc_synth', 'rb') as file:
+    #    circuit_mech = pickle.load(file)
 
     # SABRE
-    with open(base_path + "asd", 'rb') as file:
+    logging.info("SABRE: Loading file")
+    with open(base_path + f'{code_name}_d_square_{n}_{n}_{c}_qiskit', 'rb') as file:
         circuit_qiskit = pickle.load(file)
-    """
-    pass
+    logging.info("SABRE: Calculating statistics")
+    result_qiskit = calc_circuit_qiskit_stats(circuit_qiskit, simple_dqc_backend)
+    
+    # Plot results
+    filename = f'evaluation/figures/gate_overhead_{code_name}_d_square_{n}_{n}_{c}.png'
+    plot_gate_overhead(result_mech, None, result_qiskit, filename)
+    

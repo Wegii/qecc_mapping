@@ -5,7 +5,7 @@ import networkx as nx
 
 # MECH
 sys.path.append(os.path.join(os.getcwd(), "./src/baseline/MECH"))
-from qecc_mapping.src.baseline.MECH import Router
+from src.baseline.MECH import Router
 from src.baseline.MECH.Chiplet import *
 from src.baseline.MECH.Circuit import *
 
