@@ -189,53 +189,54 @@ def write_to_file(object, filename: str) -> None:
     pickle.dump(object, filehandler)
 
 
-# Select surface code as this is supported and tested with both MECH and QECC-Synth
-code_name = "surface"
+if __name__ == '__main__':
+    # Select surface code as this is supported and tested with both MECH and QECC-Synth
+    code_name = "surface"
 
-# Generate square backend of different size and chiplet connectivity
-#nnx = [4, 6, 8]
-#cl = [4]
-#cl = [4, 2, 1]
-nnx = [8]
-cl = [4]
+    # Generate square backend of different size and chiplet connectivity
+    #nnx = [4, 6, 8]
+    #cl = [4]
+    #cl = [4, 2, 1]
+    nnx = [8]
+    cl = [4]
 
-for n, c in tqdm(itertools.product(nnx, cl), total=len(nnx) * len(cl)):
-    logging.info(f"Running experiment for nx = ny = {n} and c = {c}")
+    for n, c in tqdm(itertools.product(nnx, cl), total=len(nnx) * len(cl)):
+        logging.info(f"Running experiment for nx = ny = {n} and c = {c}")
 
-    # Generate backend
-    simple_dqc_backend, qubit_num, data_qubit_num = generate_simple_dqc_backend(n, n, c)
-    # Print backend to file
-    display_simple_backend(simple_dqc_backend, f"data/backends/square_{n}_{n}_{c}.png")
-    
-    # Calculate size of code based on backend size
-    d = get_max_d(code_name, data_qubit_num)
-    logging.info(f"Max distance for {code_name} is {d}")
-    if d < 3:
-        logging.error(
-            f"Code distance too small! {code_name} with distance {d} and {data_qubit_num} qubits: Execution not possible")
-        exit(1)
-    cycles = d
-    # Generate code
-    code = get_code(code_name, d, cycles)
-    logging.info("Generated QEC Code")
+        # Generate backend
+        simple_dqc_backend, qubit_num, data_qubit_num = generate_simple_dqc_backend(n, n, c)
+        # Print backend to file
+        display_simple_backend(simple_dqc_backend, f"data/backends/square_{n}_{n}_{c}.png")
+        
+        # Calculate size of code based on backend size
+        d = get_max_d(code_name, data_qubit_num)
+        logging.info(f"Max distance for {code_name} is {d}")
+        if d < 3:
+            logging.error(
+                f"Code distance too small! {code_name} with distance {d} and {data_qubit_num} qubits: Execution not possible")
+            exit(1)
+        cycles = d
+        # Generate code
+        code = get_code(code_name, d, cycles)
+        logging.info("Generated QEC Code")
 
-    # Mapping and routing of the circuit, utilizing different algorithms
+        # Mapping and routing of the circuit, utilizing different algorithms
 
-    # MECH
-    circuit_mech = transpile_circuit_MECH(code.qc, simple_dqc_backend)
-    write_to_file(circuit_mech, f"data/transpiled_circuit/{code_name}_{d}_square_{n}_{n}_{c}_mech")
+        # MECH
+        circuit_mech = transpile_circuit_MECH(code.qc, simple_dqc_backend)
+        write_to_file(circuit_mech, f"data/transpiled_circuit/{code_name}_{d}_square_{n}_{n}_{c}_mech")
 
-    # QECC-Synth
-    # Generate backend for QECC-Synth
-    architecture = generate_qecc_synth_backend_from_mech(simple_dqc_backend)
-    # Perform algorithm
-    circuit_qecc_synth = transpile_circuit_QECCSynth(d, architecture, f'square_{n}_{n}_{c}')
-    write_to_file(circuit_qecc_synth, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_qecc_synth")  
-    # Found optimium: 6, 6, 4  
+        # QECC-Synth
+        # Generate backend for QECC-Synth
+        architecture = generate_qecc_synth_backend_from_mech(simple_dqc_backend)
+        # Perform algorithm
+        circuit_qecc_synth = transpile_circuit_QECCSynth(d, architecture, f'square_{n}_{n}_{c}')
+        write_to_file(circuit_qecc_synth, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_qecc_synth")  
+        # Found optimium: 6, 6, 4  
 
-    # Qiskit-SABRE
-    # Generate backend for qiskit
-    cm = generate_qiskit_backend_from_mech(simple_dqc_backend)
-    # Perform algorithm
-    circuit_qiskit = transpile_circuit_SABRE(circuit = code.qc, coupling_map = cm)
-    write_to_file(circuit_qiskit, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_qiskit")
+        # Qiskit-SABRE
+        # Generate backend for qiskit
+        cm = generate_qiskit_backend_from_mech(simple_dqc_backend)
+        # Perform algorithm
+        circuit_qiskit = transpile_circuit_SABRE(circuit = code.qc, coupling_map = cm)
+        write_to_file(circuit_qiskit, f"data/transpiled_circuit/{code_name}_d_square_{n}_{n}_{c}_qiskit")

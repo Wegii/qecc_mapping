@@ -8,6 +8,7 @@ sys.path.append(os.path.join(os.getcwd(), "./src/baseline/MECH"))
 from src.baseline.MECH import Router
 from src.baseline.MECH.Chiplet import *
 from src.baseline.MECH.Circuit import *
+import src.baseline.MECH.Circuit as Circuit
 
 
 def calc_circuit_qiskit_stats(transpiled_circuit: qiskit.circuit, G: nx.graph) -> dict:
@@ -33,6 +34,8 @@ def calc_circuit_qiskit_stats(transpiled_circuit: qiskit.circuit, G: nx.graph) -
     swap_decomposed_depth += swap_decomposed_circuit.depth(filter_function)
 
     # Count instructions
+    within_chip_cnots = 0
+    cross_chip_cnots = 0
     for instr, qargs, cargs in swap_decomposed_circuit.data:
         # Only care about 2-qubit gates
         if instr.num_qubits < 2:
@@ -88,9 +91,18 @@ def calc_circuit_mech_stats(router: Router) -> dict:
                 meas_num += 1
             if router.circuit.take_role(line, idx) in ['t', 'mt']:
                 node = router.circuit.take_node(line, idx)
-                if isinstance(node, OpNode):
+                #print(node.control)
+                #print(isinstance(node, Circuit.MOpNode))
+                #if isinstance(node, OpNode):
+                #print(isinstance(node, Circuit.OpNode))
+                #print()
+                #print(type(node).__module__)
+                #print(MOpNode)
+                #print(MOpNode.__module__)
+
+                if type(node).__name__ == "OpNode":
                     control_line = node.control
-                if isinstance(node, MOpNode):
+                if type(node).__name__ == "MOpNode":
                     control_line = node.shared
                 control_qubit, target_qubit = router.highway_manager.idx_qubit_dict[control_line], router.highway_manager.idx_qubit_dict[line]
                 
